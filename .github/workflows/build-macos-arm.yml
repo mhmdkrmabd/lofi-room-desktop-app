@@ -1,0 +1,32 @@
+name: Build macOS ARM
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-macos-arm:
+    runs-on: macos-latest  # ARM-based macOS runner (M1/M2)
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build macOS ARM package
+      run: npm run package
+
+    - name: Upload macOS ARM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lofi-room-macos-arm
+        path: out/lofi-room-darwin-arm64/
+        include-hidden-files: true
+        retention-days: 7

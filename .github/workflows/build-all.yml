@@ -1,0 +1,21 @@
+name: Build All Platforms
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build Linux
+    uses: ./.github/workflows/build-linux.yml
+
+  build-windows:
+    name: Build Windows
+    uses: ./.github/workflows/build-windows.yml
+
+  build-macos-intel:
+    name: Build macOS Intel
+    uses: ./.github/workflows/build-macos-intel.yml
+
+  build-macos-arm:
+    name: Build macOS ARM
+    uses: ./.github/workflows/build-macos-arm.yml

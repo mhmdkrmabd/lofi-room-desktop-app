@@ -1,0 +1,32 @@
+name: Build macOS Intel
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-macos-intel:
+    runs-on: macos-13  # Intel-based macOS runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build macOS Intel package
+      run: npm run package
+
+    - name: Upload macOS Intel artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lofi-room-macos-intel
+        path: out/lofi-room-darwin-x64/
+        include-hidden-files: true
+        retention-days: 7

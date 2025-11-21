@@ -1,0 +1,15 @@
+/node_modules
+/build
+/package
+/dist
+/files
+/.webpack
+/out
+*.log
+.DS_Store
+.env
+
+# Server
+server/__pycache__/
+server/*.pyc
+server/tracks/*.mp3

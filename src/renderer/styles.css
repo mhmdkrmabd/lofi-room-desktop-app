@@ -1,0 +1,853 @@
+/* Sniglet Font */
+@font-face {
+  font-family: 'Sniglet';
+  src: url('./assets/fonts/Sniglet/Sniglet-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sniglet';
+  src: url('./assets/fonts/Sniglet/Sniglet-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --text: #333;
+  --bg: #fff;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Sniglet', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+#app-root {
+  width: 240px;
+  height: 310px;
+  position: relative;
+  background: var(--bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+/* Dark theme */
+#app-root.darkTheme {
+  --text: #fff;
+  --bg: #1a1a1a;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* Animated gradient background */
+.gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  --color1: rgba(224, 190, 114, 0.27);
+  --color2: rgba(224, 190, 114, 0.53);
+  --color3: rgba(224, 190, 114, 0.20);
+  transition: --color1 1.2s ease, --color2 1.2s ease, --color3 1.2s ease;
+}
+
+@property --color1 {
+  syntax: '<color>';
+  initial-value: rgba(224, 190, 114, 0.27);
+  inherits: false;
+}
+
+@property --color2 {
+  syntax: '<color>';
+  initial-value: rgba(224, 190, 114, 0.53);
+  inherits: false;
+}
+
+@property --color3 {
+  syntax: '<color>';
+  initial-value: rgba(224, 190, 114, 0.20);
+  inherits: false;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Main content */
+#front,
+#back {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#front {
+  transition: opacity 0.3s ease;
+}
+
+#app-root.inMenu #front {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+  background: var(--bg);
+}
+
+#app-root.inMenu #back {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Main area (draggable) */
+#main-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  position: relative;
+}
+
+#main-area .content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Volume indicator */
+.volume {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  text-shadow: 0 2px 8px var(--shadow);
+  position: absolute;
+  bottom: -40px;
+  right: 0;
+  left: 0;
+  margin: auto;
+  transform: none;
+  width: fit-content;
+  height: fit-content;
+}
+
+.volume.show {
+  opacity: 1;
+}
+
+/* Ambient volume indicator */
+.ambient-volume {
+  position: absolute;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  text-shadow: 0 2px 8px var(--shadow);
+  top: 52px;
+  left: 25px;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+}
+
+.ambient-volume.show {
+  opacity: 1;
+}
+
+/* Time display */
+.time-display {
+  position: absolute;
+  bottom: 7px;
+  right: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  opacity: 0.7;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 1px 4px var(--shadow);
+  transition: opacity 0.2s ease;
+}
+
+/* Hide time display when volume is shown */
+.volume.show~.time-display {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Thumbnail container */
+.thumbnail-container {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  transform: translateY(15px);
+}
+
+#app-root.darkTheme .thumbnail-container {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.thumbnail-disc {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.3));
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.thumbnail-container.playing .thumbnail-disc {
+  animation: disc-rotate 3s linear infinite;
+}
+
+.disc-center {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 40%, rgba(255, 255, 255, 0.1) 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Anime background in vinyl */
+.anime-background {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.anime-background img {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: -webkit-fill-available;
+  width: fit-content;
+}
+
+/* Vue transition for crossfade effect */
+.anime-fade-enter-active,
+.anime-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.anime-fade-enter,
+.anime-fade-leave-to {
+  opacity: 0;
+}
+
+.anime-fade-enter-to,
+.anime-fade-leave {
+  opacity: 1;
+}
+
+/* Grooves effect */
+.thumbnail-disc::before {
+  content: '';
+  position: absolute;
+  width: 90%;
+  height: 90%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.3),
+    0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+@keyframes disc-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading spinner */
+.spinner {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.spinner-ring {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--text);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Menu button */
+.youtube {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 10;
+}
+
+.youtube:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.ambient-controls-container {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  transition: background 0.3s ease;
+  z-index: 10;
+  transform: scale(0.9);
+}
+
+#app-root.darkTheme .ambient-controls-container {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.ambient-sounds-btn {
+  width: 32px;
+  height: 32px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.ambient-sounds-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.ambient-play-pause-btn {
+  width: 24px;
+  height: 24px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.ambient-play-pause-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Rain animation for ambient sounds icon */
+.ambient-sounds-btn .rain-drop {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ambient-sounds-btn.active .rain-drop {
+  opacity: 0.7;
+  animation: rain-fall 1s ease-in infinite;
+}
+
+.ambient-sounds-btn.active .rain-drop-1 {
+  animation-delay: 0s;
+}
+
+.ambient-sounds-btn.active .rain-drop-2 {
+  animation-delay: 0.3s;
+}
+
+.ambient-sounds-btn.active .rain-drop-3 {
+  animation-delay: 0.6s;
+}
+
+@keyframes rain-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.7;
+  }
+
+  90% {
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+.sound-badge {
+  fill: var(--text);
+  font-family: 'Sniglet', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+}
+
+/* Ensure buttons and selects use Sniglet */
+button,
+select {
+  font-family: 'Sniglet', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.menu {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.menu:hover {
+  opacity: 1;
+}
+
+/* Buy Me a Coffee Button */
+.coffee-button-wrapper {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coffee-button {
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(0.75);
+}
+
+#app-root.darkTheme .coffee-button {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.coffee-button:hover {
+  opacity: 1;
+  transform: scale(1.08) translateY(-2px);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+  animation: coffee-shake 1.2s ease-in-out 0.3s, coffee-glow 2s ease-in-out infinite;
+}
+
+.coffee-button:active {
+  transform: scale(0.95) translateY(0);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  animation: none;
+}
+
+/* Gentle shake animation - activates after 300ms hover */
+@keyframes coffee-shake {
+
+  0%,
+  100% {
+    transform: scale(1.08) translateY(-2px) rotate(0deg);
+  }
+
+  25% {
+    transform: scale(1.08) translateY(-2px) rotate(-2deg);
+  }
+
+  50% {
+    transform: scale(1.08) translateY(-2px) rotate(2deg);
+  }
+
+  75% {
+    transform: scale(1.08) translateY(-2px) rotate(-1deg);
+  }
+}
+
+/* Pulse animation on hover */
+@keyframes coffee-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+  }
+
+  50% {
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+  }
+}
+
+/* Coffee cup color transitions smoothly when theme changes */
+.coffee-button {
+  transition: color 1.2s ease, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Coffee Tooltip - appears after animations end */
+.coffee-tooltip {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  box-shadow: 0 4px 12px var(--shadow);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  position: absolute;
+  left: 60px;
+}
+
+.coffee-button-wrapper:hover .coffee-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.6s;
+}
+
+/* Buttons */
+.buttons {
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+#app-root.darkTheme .buttons {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.buttons svg {
+  width: 32px;
+  height: 32px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.buttons svg:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.buttons svg:active {
+  transform: scale(0.95);
+}
+
+.buttons .playpause {
+  width: 40px;
+  height: 40px;
+}
+
+/* Settings menu */
+.row {
+  margin: 12px 0;
+}
+
+.row.flex {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.row.flex.edge {
+  justify-content: space-between;
+}
+
+.row.flex.left {
+  justify-content: flex-start;
+}
+
+.row.flex.center {
+  justify-content: center;
+}
+
+.row.no-margin {
+  margin: 6px 0;
+}
+
+.row.flex.group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-start;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.row.flex.less-margin-bottom {
+  margin-bottom: 2px;
+}
+
+.row h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.youtube-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.youtube-icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.info-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.info-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--text);
+  cursor: help !important;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  background: #d1d1d1;
+  border-radius: 50%;
+  transform: scale(0.7) translateX(-15px) translateY(0px);
+}
+
+.info-icon-wrapper:hover .info-icon {
+  opacity: 0.9;
+}
+
+.custom-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: -50px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 12px var(--shadow);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  z-index: 1000;
+}
+
+.info-icon-wrapper:hover .custom-tooltip {
+  opacity: 1;
+}
+
+.row svg {
+  width: 24px;
+  height: 24px;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.row svg:hover {
+  opacity: 1;
+}
+
+.row span {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.spacer {
+  height: 20px;
+}
+
+/* Color blobs */
+.colorblob {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.colorblob:hover {
+  border-color: var(--text);
+}
+
+.colorblob.selected {
+  border-color: var(--text);
+}
+
+.colorblob.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.colorblob.disabled:hover {
+  border-color: transparent;
+}
+
+.colorblob div {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+/* Track Progress Bar */
+.buttons .track-progress-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.buttons .track-progress-bar {
+  height: 100%;
+  background: var(--text);
+  opacity: 0.6;
+  transition: width 0.1s linear;
+}
+
+/* Footer */
+footer {
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+footer a {
+  color: var(--text);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+footer a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Utility classes */
+.clickable {
+  cursor: pointer;
+}
+
+svg {
+  display: block;
+}

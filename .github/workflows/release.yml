@@ -1,0 +1,73 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build Linux
+    uses: ./.github/workflows/build-linux.yml
+
+  build-windows:
+    name: Build Windows
+    uses: ./.github/workflows/build-windows.yml
+
+  build-macos-intel:
+    name: Build macOS Intel
+    uses: ./.github/workflows/build-macos-intel.yml
+
+  build-macos-arm:
+    name: Build macOS ARM
+    uses: ./.github/workflows/build-macos-arm.yml
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-linux, build-windows, build-macos-intel, build-macos-arm]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get version from package.json
+      id: version
+      run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Display artifact structure
+      run: ls -R artifacts/
+
+    - name: Create release archives
+      run: |
+        cd artifacts/lofi-room-linux
+        zip -r ../../lofi-room-linux-x64.zip .
+        cd ../lofi-room-windows
+        zip -r ../../lofi-room-windows-x64.zip .
+        cd ../lofi-room-macos-intel
+        zip -r ../../lofi-room-macos-intel-x64.zip .
+        cd ../lofi-room-macos-arm
+        zip -r ../../lofi-room-macos-arm-arm64.zip .
+        cd ../..
+        ls -lh *.zip
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.VERSION }}
+        name: Lofi Room v${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        files: |
+          lofi-room-linux-x64.zip
+          lofi-room-windows-x64.zip
+          lofi-room-macos-intel-x64.zip
+          lofi-room-macos-arm-arm64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

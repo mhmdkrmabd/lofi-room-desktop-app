@@ -1,0 +1,111 @@
+{
+  "name": "lofiroom",
+  "productName": "Lofi Room Desktop App",
+  "version": "1.0.0",
+  "description": "The all you need to enjoy your sessions",
+  "main": ".webpack/main",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mhmdkrmabd/lofi-room-desktop-app.git"
+  },
+  "homepage": "https://github.com/mhmdkrmabd/lofi-room-desktop-app",
+  "bugs": {
+    "url": "https://github.com/mhmdkrmabd/lofi-room-desktop-app/issues"
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
+  "author": "Mohammed Abubaker (@mhmdkrmabd)",
+  "license": "MIT",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^11.0.0",
+    "howler": "^2.2.4",
+    "lucide-static": "^0.553.0",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.5.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.5.0",
+    "@electron-forge/plugin-fuses": "^7.5.0",
+    "@electron-forge/plugin-webpack": "^7.5.0",
+    "@electron/fuses": "^1.8.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vercel/webpack-asset-relocator-loader": "1.7.3",
+    "css-loader": "^6.11.0",
+    "electron": "^33.2.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.31.0",
+    "fork-ts-checker-webpack-plugin": "^7.3.0",
+    "node-loader": "^2.0.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.6.0",
+    "vue": "^2.7.16",
+    "vue-loader": "^15.11.1",
+    "vue-template-compiler": "^2.7.16"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "asar": false,
+        "icon": "./resources/icons/icon",
+        "name": "lofi-room",
+        "prune": false,
+        "extraResource": [
+          "./resources"
+        ],
+        "ignore": [
+          "^\\/\\.git",
+          "^\\/node_modules\\/(?!(sharp|@img|detect-libc|semver))"
+        ]
+      },
+      "plugins": [
+        {
+          "name": "@electron-forge/plugin-webpack",
+          "config": {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/renderer/index.html",
+                  "js": "./src/renderer/index.ts",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/preload.ts"
+                  }
+                },
+                {
+                  "html": "./src/ambient-sounds/index.html",
+                  "js": "./src/ambient-sounds/index.ts",
+                  "name": "ambient_sounds",
+                  "preload": {
+                    "js": "./src/preload.ts"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/plugin-fuses",
+          "config": {
+            "version": "1",
+            "runAsNode": false,
+            "enableCookieEncryption": true,
+            "enableNodeOptionsEnvironmentVariable": false,
+            "enableNodeCliInspectArguments": false,
+            "enableEmbeddedAsarIntegrityValidation": false,
+            "onlyLoadAppFromAsar": false
+          }
+        }
+      ]
+    }
+  }
+}
