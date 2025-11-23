@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import Store from 'electron-store';
 import Configs from './configs';
 import AppWindow from './app/app-window';
+import { MachineUuidService } from './machine-uuid-service';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -15,10 +16,12 @@ class AppCore {
   public readonly configs: Configs;
   public store: Store;
   public window: AppWindow | null = null;
+  public machineUuid: string = '';
 
   constructor() {
     this.configs = new Configs();
     this.store = new Store();
+    this.machineUuid = MachineUuidService.getUuid();
 
     this.createWindow();
   }

@@ -42,6 +42,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Anime GIF color extraction
   extractAnimeColor: (imageUrl: string) => ipcRenderer.invoke('extract-anime-color', imageUrl),
 
+  // Machine UUID
+  getMachineUuid: () => ipcRenderer.invoke('get-machine-uuid'),
+
+  // Update checking
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  onUpdateAvailable: (callback: (info: any) => void) => {
+    ipcRenderer.on('update-available', (_event, info) => callback(info));
+  },
+
   // Receivers for main window
   onAmbientToggleSound: (callback: (soundId: string) => void) => {
     ipcRenderer.on('ambient-toggle-sound', (_event, soundId) => callback(soundId));
@@ -95,6 +104,9 @@ declare global {
       saveAmbientState: (state: any) => void;
       loadAmbientState: () => Promise<any>;
       extractAnimeColor: (imageUrl: string) => Promise<string | null>;
+      getMachineUuid: () => Promise<string>;
+      checkForUpdates: () => Promise<any>;
+      onUpdateAvailable: (callback: (info: any) => void) => void;
       onAmbientToggleSound: (callback: (soundId: string) => void) => void;
       onAmbientSetSoundVolume: (callback: (soundId: string, volume: number) => void) => void;
       onAmbientSetMasterVolume: (callback: (volume: number) => void) => void;

@@ -126,6 +126,7 @@ body {
   pointer-events: none;
   transition: opacity 0.3s ease;
   padding: 20px;
+  padding-top: 10px;
   background: var(--bg);
 }
 
@@ -466,6 +467,115 @@ body {
 button,
 select {
   font-family: 'Sniglet', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Update indicator */
+.update-indicator {
+  position: absolute;
+  top: 15px;
+  right: 70px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  z-index: 15;
+  transition: transform 0.2s ease;
+}
+
+.update-indicator:hover {
+  transform: scale(1.15);
+}
+
+.update-icon {
+  width: 33px;
+  height: 33px;
+  filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 3px currentColor);
+  animation: pulse-update 4s ease-in-out infinite, glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse-update {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  3% {
+    transform: rotate(-8deg) scale(1.05);
+  }
+
+  6% {
+    transform: rotate(8deg) scale(1.1);
+  }
+
+  9% {
+    transform: rotate(-6deg) scale(1.08);
+  }
+
+  12% {
+    transform: rotate(6deg) scale(1.06);
+  }
+
+  15% {
+    transform: rotate(-4deg) scale(1.04);
+  }
+
+  18% {
+    transform: rotate(4deg) scale(1.02);
+  }
+
+  21% {
+    transform: rotate(-2deg) scale(1.01);
+  }
+
+  25% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  /* Pause for 3 seconds (25% shake = 1s, 75% pause = 3s) */
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0% {
+    filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 2px currentColor);
+  }
+
+  12% {
+    filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 8px currentColor) drop-shadow(0 0 20px currentColor);
+  }
+
+  25% {
+    filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 2px currentColor);
+  }
+
+  /* Keep subtle glow during pause */
+  100% {
+    filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 2px currentColor);
+  }
+}
+
+.update-tooltip {
+  top: 38px;
+  right: -40px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  box-shadow: 0 4px 12px var(--shadow);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  position: absolute;
+}
+
+.update-indicator:hover .update-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .menu {

@@ -1,5 +1,5 @@
 <template>
-  <div id="app-root" :class="{ inMenu: inMenu, darkTheme: settings.darktheme }">
+  <div id="app-root" :class="{ inMenu: inMenu, darkTheme: settings.darktheme }" :style="themeColorStyle">
     <!-- Animated gradient background -->
     <div class="gradient-bg" :style="gradientStyle"></div>
 
@@ -40,6 +40,22 @@
               <use xlink:href="#i-rain-cloud-animated" />
               <text v-if="activeSoundCount > 0" class="sound-badge" x="14" y="8" font-size="8" font-weight="bold">{{ activeSoundCount }}</text>
             </svg>
+          </div>
+
+          <!-- Update Indicator -->
+          <div v-if="updateAvailable" class="update-indicator" @click="openUpdatePage">
+            <svg class="update-icon" :style="updateIndicatorStyle" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1.14,14.362A3.876,3.876,0,0,1,.592,9.546L6.338.353A.75.75,0,0,1,7.5.22L15.282,8a.749.749,0,0,1-.132,1.166L5.956,14.91a3.895,3.895,0,0,1-4.816-.548Zm.724-4.021a2.393,2.393,0,0,0,3.3,3.3l.892-.557L2.421,9.45Zm5.494,1.924,2.387-1.492L4.728,5.758,3.237,8.144Zm3.692-2.308,2.505-1.566L7.11,1.947,5.544,4.452Z" transform="translate(3.233 5.265)" fill="var(--update-outline)"/>
+              <path d="M1.5,4.15V.75A.75.75,0,0,0,0,.75v3.4a.75.75,0,0,0,1.5,0Z" transform="translate(14.971 1.45)" fill="currentColor"/>
+              <path d="M1.16,3.114,3.82,1.378A.75.75,0,0,0,3,.122L.34,1.857a.75.75,0,1,0,.82,1.256Z" transform="translate(17.312 6.75)" fill="currentColor"/>
+              <path d="M1.28,2.107l.827-.827A.75.75,0,0,0,1.047.22L.22,1.047A.75.75,0,0,0,1.28,2.107Z" transform="translate(17.971 3.798)" fill="currentColor"/>
+              <path d="M.75,1.5H.967a.75.75,0,0,0,0-1.5H.75a.75.75,0,0,0,0,1.5Z" transform="translate(18.971 10.625)" fill="currentColor"/>
+              <path d="M.75,1.5H.967a.75.75,0,0,0,0-1.5H.75a.75.75,0,0,0,0,1.5Z" transform="translate(14.971 7.625)" fill="currentColor"/>
+              <path d="M1.881,1.478,1.439.453a.75.75,0,1,0-1.377.594L.5,2.073a.75.75,0,1,0,1.377-.594Z" transform="translate(11.528 2.599)" fill="currentColor"/>
+            </svg>
+            <div class="update-tooltip">
+              New version {{ latestVersion }} available!
+            </div>
           </div>
 
           <svg class="menu clickable" @click="uiMenu(true)" alt="Menu" draggable="false" title="Menu">
@@ -333,6 +349,10 @@ export default Vue.extend({
       duration: 0,
       currentAnimeGif: '',
       extractedColor: null as string | null,
+      machineUuid: '',
+      updateAvailable: false,
+      latestVersion: '',
+      updateUrl: '',
     };
   },
   computed: {
@@ -398,6 +418,25 @@ export default Vue.extend({
 
       return `color: ${color}; --bmc-outline: ${outlineColor};`;
     },
+    themeColorStyle(): string {
+      // Use extracted color from anime GIF if enabled, otherwise use manual color
+      const color = (this.settings.animeEnabled && this.extractedColor)
+        ? this.extractedColor
+        : this.colors[this.settings.color];
+
+      return `--theme-color: ${color};`;
+    },
+    updateIndicatorStyle(): string {
+      // Use extracted color from anime GIF if enabled, otherwise use manual color
+      const color = (this.settings.animeEnabled && this.extractedColor)
+        ? this.extractedColor
+        : this.colors[this.settings.color];
+
+      // Outline color: white for dark theme, black for light theme
+      const outlineColor = this.settings.darktheme ? '#ffffff' : '#0D0C22';
+
+      return `color: ${color}; --update-outline: ${outlineColor};`;
+    },
   },
   watch: {
     volume(value: number) {
@@ -405,7 +444,7 @@ export default Vue.extend({
       window.electronAPI.setSetting('volume', value);
     },
   },
-  mounted() {
+  async mounted() {
     // Initialize electron IPC
     window.electronAPI.init();
     window.electronAPI.onLoadSettings((settings: Settings) => {
@@ -415,6 +454,16 @@ export default Vue.extend({
           this.volume = settings.volume;
         }
       }
+    });
+
+    // Get machine UUID
+    this.machineUuid = await window.electronAPI.getMachineUuid();
+
+    // Setup update checking
+    window.electronAPI.onUpdateAvailable((info: any) => {
+      this.updateAvailable = true;
+      this.latestVersion = info.version;
+      this.updateUrl = info.releaseUrl;
     });
 
     // Setup player event listeners
@@ -754,12 +803,17 @@ export default Vue.extend({
     uiLinkExt(url: string) {
       window.electronAPI.openExternal(url);
     },
+    openUpdatePage() {
+      if (this.updateUrl) {
+        window.electronAPI.openExternal(this.updateUrl);
+      }
+    },
     async nextTrack() {
       try {
         // Fetch new random track from API
         this.player.pause();
         const timestamp = Date.now();
-        const trackUrl = `${API_ENDPOINT}?t=${timestamp}`;
+        const trackUrl = `${API_ENDPOINT}?t=${timestamp}&uuid=${this.machineUuid}`;
 
         // Get track name from server before loading it
         const response = await fetch(trackUrl, { method: 'HEAD' });
@@ -815,10 +869,10 @@ export default Vue.extend({
         if (timestamp) {
           // Try to exploit cache by using the original timestamp
           // This will hit browser cache if still valid (within 1 hour)
-          trackUrl = `${API_ENDPOINT}?t=${timestamp}`;
+          trackUrl = `${API_ENDPOINT}?t=${timestamp}&uuid=${this.machineUuid}`;
         } else {
           // No timestamp provided, load by track name (cache miss or manual load)
-          trackUrl = `${API_ENDPOINT}?track=${encodeURIComponent(trackName)}&t=${Date.now()}`;
+          trackUrl = `${API_ENDPOINT}?track=${encodeURIComponent(trackName)}&t=${Date.now()}&uuid=${this.machineUuid}`;
         }
 
         this.player.src = trackUrl;

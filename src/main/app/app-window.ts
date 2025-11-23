@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain, app, screen, shell, nativeImage } from 'electro
 import Store from 'electron-store';
 import { Core } from '../index';
 import { AmbientSoundsWindowManager } from './ambient-sounds-window';
+import { UpdateService } from '../update-service';
 import sharp from 'sharp';
 import path from 'path';
 
@@ -193,6 +194,23 @@ export default class AppWindow extends BrowserWindow {
     ipcMain.handle('load-ambient-state', () => {
       return this.store.get('ambientSounds', null);
     });
+
+    // Get machine UUID
+    ipcMain.handle('get-machine-uuid', () => {
+      return Core.machineUuid;
+    });
+
+    // Check for updates
+    ipcMain.handle('check-for-updates', async () => {
+      const updateInfo = await UpdateService.checkForUpdates();
+      if (updateInfo) {
+        win.webContents.send('update-available', updateInfo);
+      }
+      return updateInfo;
+    });
+
+    // Start periodic update checks
+    UpdateService.startPeriodicChecks(win);
 
     // Extract dominant color from anime GIF
     ipcMain.handle('extract-anime-color', async (_e, imageUrl: string) => {
