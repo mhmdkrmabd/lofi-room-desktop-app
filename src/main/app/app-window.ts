@@ -65,7 +65,7 @@ export default class AppWindow extends BrowserWindow {
     // Set CSP (allow media sources for audio streaming and external images)
     this.webContents.session.webRequest.onHeadersReceived((details, callback) => {
       const csp = process.env.NODE_ENV === 'production'
-        ? "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src https://mhmd.io:1512 https://api.otakugifs.xyz http://localhost:* file:; media-src https://mhmd.io:1512 http://localhost:* data: blob: file:; img-src 'self' https://cdn.otakugifs.xyz data: blob:;"
+        ? "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src https://lofiroom.mhmd.io https://api.otakugifs.xyz http://localhost:* file:; media-src https://lofiroom.mhmd.io http://localhost:* data: blob: file:; img-src 'self' https://cdn.otakugifs.xyz data: blob:;"
         : "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src * ws: wss:; media-src * http: https: data: blob:; style-src 'self' 'unsafe-inline'; img-src * http: https: data: blob:;";
 
       callback({
